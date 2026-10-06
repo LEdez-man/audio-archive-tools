@@ -1,0 +1,33 @@
+{
+ "transcribe": true,
+ "project_fields": [
+  {"key": "project", "type": "text"},
+  {"key": "principal_investigator", "type": "text"},
+  {"key": "institution", "type": "text"},
+  {"key": "funder", "type": "text"},
+  {"key": "period", "type": "text"},
+  {"key": "region", "type": "text"},
+  {"key": "languages_iso", "type": "list"},
+  {"key": "description", "type": "textarea"},
+  {"key": "repository", "type": "text"},
+  {"key": "license", "type": "text"},
+  {"key": "ethics_approval", "type": "text"}
+ ],
+ "recording_fields": [
+  {"key": "session_id", "type": "text"},
+  {"key": "place", "type": "text"},
+  {"key": "coordinates", "type": "text"},
+  {"key": "language_iso", "type": "text"},
+  {"key": "variety", "type": "text"},
+  {"key": "speakers_detail", "type": "textarea"},
+  {"key": "recorded_by", "type": "text"},
+  {"key": "genre", "type": "select", "options": ["elicitation", "wordlist", "narrative", "conversation", "interview", "procedural", "song", "ritual", "other"]},
+  {"key": "stimulus", "type": "text"},
+  {"key": "equipment", "type": "text"},
+  {"key": "audio_format", "type": "text"},
+  {"key": "consent", "type": "select", "options": ["yes", "written", "oral", "pending", "no"]},
+  {"key": "access", "type": "select", "options": ["open", "restricted", "closed"]},
+  {"key": "transcription_status", "type": "select", "options": ["none", "automatic", "corrected", "annotated"]}
+ ],
+ "categories": [{"key": "languages"}, {"key": "genres"}, {"key": "speakers"}, {"key": "places"}]
+}

@@ -1,0 +1,26 @@
+{
+ "transcribe": true,
+ "chapters_label": "soundbites",
+ "project_fields": [
+  {"key": "production", "type": "text"},
+  {"key": "outlet", "type": "text"},
+  {"key": "author", "type": "text"},
+  {"key": "editor", "type": "text"},
+  {"key": "format", "type": "select", "options": ["news", "report", "feature", "documentary", "podcast", "vox_pop", "other"]},
+  {"key": "topic", "type": "text"},
+  {"key": "period", "type": "text"},
+  {"key": "deadline", "type": "date"},
+  {"key": "description", "type": "textarea"}
+ ],
+ "recording_fields": [
+  {"key": "take", "type": "text"},
+  {"key": "interviewee", "type": "text"},
+  {"key": "role", "type": "text"},
+  {"key": "situation", "type": "select", "options": ["interview", "vox_pop", "statement", "press_conference", "ambience", "scene", "phone", "other"]},
+  {"key": "place", "type": "text"},
+  {"key": "release", "type": "select", "options": ["yes", "anonymised", "pending", "no"]},
+  {"key": "rating", "type": "select", "options": ["usable", "maybe", "unusable"]},
+  {"key": "equipment", "type": "text"}
+ ],
+ "categories": [{"key": "people"}, {"key": "topics"}, {"key": "take_types"}, {"key": "places"}]
+}

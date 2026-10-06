@@ -1,0 +1,310 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio archive - edit</title>
+<style>
+:root {
+  --bg: #f6f3ee; --panel: #fffdf9; --ink: #2b2723; --muted: #7a7168; --line: #e4ddd3;
+  --accent: #9a4f2c; --accent-soft: #f3e3d9; --chip: #efe9e1; --warn: #b3261e; --ok: #2e6b3a;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1b1916; --panel: #24211d; --ink: #ece6dd; --muted: #a39a8e; --line: #3a352f;
+          --accent: #e09a72; --accent-soft: #3d2c22; --chip: #322d27; --warn: #f2b8b5; --ok: #9ad3a5; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+       font: 15px/1.45 "Segoe UI", system-ui, "Hiragino Sans", "Microsoft YaHei", sans-serif; }
+header { max-width: 1240px; margin: 0 auto; padding: 22px 16px 8px; }
+h1 { font: 600 24px/1.2 Georgia, serif; margin: 0 0 4px; }
+.intro { color: var(--muted); margin: 0; max-width: 80ch; }
+.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1240px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 4px; margin-right: 10px;
+       font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; }
+.tab.on { color: var(--ink); border-color: var(--accent); }
+.spacer { flex: 1; }
+.status { color: var(--muted); font-size: 13px; }
+button.b { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+           border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+button.b.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.b:disabled { opacity: .5; cursor: default; }
+main { max-width: 1240px; margin: 0 auto; padding: 16px 16px 60px; }
+.msg { margin: 0 0 12px; padding: 8px 12px; border-radius: 6px; background: var(--accent-soft); display: none; }
+.cols { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; }
+@media (max-width: 820px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.list { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; max-height: 78vh; overflow: auto; }
+@media (max-width: 820px) { .list { max-height: 40vh; } }
+.list-tools { padding: 8px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; position: sticky; top: 0; background: var(--panel); }
+.item { padding: 7px 10px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.item:hover { background: var(--chip); }
+.item.sel { background: var(--accent-soft); }
+.item .t { font-weight: 600; overflow-wrap: anywhere; }
+.item .s { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.item .dot { color: var(--accent); }
+.form { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px 16px; }
+.full { grid-column: 1 / -1; }
+label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
+.hint { font-weight: 400; }
+input[type=text], input[type=date], input[type=search], select, textarea {
+  width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 8px; }
+textarea { min-height: 70px; resize: vertical; }
+input.bad { border-color: var(--warn); }
+.check { display: flex; gap: 6px; align-items: center; font-size: 14px; color: var(--ink); font-weight: 400; margin-top: 6px; }
+h2 { font: 600 17px Georgia, serif; margin: 18px 0 8px; }
+h2:first-child { margin-top: 0; }
+.meta { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; margin-bottom: 8px; }
+audio { width: 100%; margin: 6px 0 10px; }
+.preview { font-size: 14px; max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 6px; }
+.preview div { cursor: pointer; padding: 1px 2px; }
+.preview div:hover { background: var(--chip); }
+.tc { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
+.nav { display: flex; justify-content: space-between; margin-top: 14px; }
+</style>
+</head>
+<body>
+<header><h1 id="h1"></h1><p class="intro" id="intro"></p></header>
+<div class="bar"><div class="bar-in">
+  <button class="tab on" data-tab="rec" id="tab-rec"></button>
+  <button class="tab" data-tab="proj" id="tab-proj"></button>
+  <span class="spacer"></span>
+  <span class="status" id="status"></span>
+  <button class="b" id="discard"></button>
+  <button class="b" id="copy"></button>
+  <button class="b primary" id="save"></button>
+</div></div>
+<main>
+  <p class="msg" id="msg"></p>
+  <section id="rec">
+    <div class="cols">
+      <div class="list">
+        <div class="list-tools">
+          <input type="search" id="filter">
+          <label class="check"><input type="checkbox" id="untitled"> <span id="l-untitled"></span></label>
+        </div>
+        <div id="items"></div>
+      </div>
+      <div class="form" id="form"></div>
+    </div>
+  </section>
+  <section id="proj" hidden><div class="form" id="pform"></div></section>
+</main>
+<datalist id="dl-none"></datalist>
+<script>
+const DATA = /*__DATA__*/null;
+const M = DATA.meta, E = M.editor, R = DATA.recordings;
+const KEY = "audio-archive-edits:" + location.pathname;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
+const clock = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const url = f => encodeURI(f).replace(/#/g, "%23");
+
+let edits = { recordings: {}, project: {} };
+try { edits = Object.assign(edits, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(edits)); } catch (e) {} status(); };
+
+// effective value = saved value overridden by unsaved edit
+const recEdit = r => edits.recordings[r.original] || {};
+function val(r, path) {
+  const e = recEdit(r);
+  const [a, b] = path.split(".");
+  if (b) return (e[a] && b in e[a]) ? e[a][b] : (r[a] || {})[b];
+  return a in e ? e[a] : r[a];
+}
+function setVal(r, path, v) {
+  const e = edits.recordings[r.original] = recEdit(r);
+  const [a, b] = path.split(".");
+  if (b) (e[a] = e[a] || {})[b] = v; else e[a] = v;
+  persist(); renderList();
+}
+
+// ----- texts -----
+document.documentElement.lang = M.lang;
+document.title = M.title + " – " + E.heading;
+$("#h1").textContent = M.title + " – " + E.heading;
+$("#intro").textContent = E.intro;
+$("#tab-rec").textContent = E.tab_recordings;
+$("#tab-proj").textContent = E.tab_project;
+$("#save").textContent = E.save; $("#copy").textContent = E.copy; $("#discard").textContent = E.discard;
+$("#filter").placeholder = E.filter; $("#l-untitled").textContent = E.only_untitled;
+
+function status() {
+  const n = Object.keys(edits.recordings).length + (Object.keys(edits.project).length || edits.title !== undefined ? 1 : 0);
+  $("#status").textContent = fmt(E.changed, { n });
+  $("#save").disabled = $("#copy").disabled = $("#discard").disabled = !n;
+}
+function flash(text) { const m = $("#msg"); m.textContent = text; m.style.display = "block"; setTimeout(() => m.style.display = "none", 6000); }
+
+// ----- generic field widget -----
+function widget(f, value, onChange) {
+  const id = "f" + Math.random().toString(36).slice(2);
+  const wrap = document.createElement("div");
+  if (f.type === "textarea") wrap.className = "full";
+  let hint = f.type === "list" ? ` <span class="hint">(${esc(E.list_hint)})</span>` : "";
+  wrap.innerHTML = `<label for="${id}">${esc(f.label)}${hint}</label>`;
+  let el;
+  if (f.type === "textarea") el = document.createElement("textarea");
+  else if (f.type === "select") {
+    el = document.createElement("select");
+    el.innerHTML = `<option value=""></option>` + f.options.map(([k, l]) => `<option value="${esc(k)}">${esc(l)}</option>`).join("");
+  } else { el = document.createElement("input"); el.type = f.type === "date" ? "date" : "text"; }
+  el.id = id;
+  el.value = Array.isArray(value) ? value.join(", ") : (value ?? "");
+  el.addEventListener("change", () => onChange(f.type === "list"
+    ? el.value.split(",").map(s => s.trim()).filter(Boolean) : el.value));
+  wrap.appendChild(el);
+  return wrap;
+}
+
+// ----- project tab -----
+function renderProject() {
+  const box = $("#pform"); box.innerHTML = "";
+  const g = document.createElement("div"); g.className = "grid";
+  g.appendChild(widget({ label: E.archive_title, type: "text" }, edits.title ?? M.title, v => { edits.title = v; persist(); }));
+  for (const f of M.project_fields)
+    g.appendChild(widget(f, f.key in edits.project ? edits.project[f.key] : M.project[f.key], v => { edits.project[f.key] = v; persist(); }));
+  box.appendChild(g);
+}
+
+// ----- recordings tab -----
+let current = 0;
+const suggestions = {};
+M.categories.forEach(c => {
+  const s = new Set(c.order || []);
+  R.forEach(r => ((r.tags || {})[c.key] || []).forEach(v => s.add(v)));
+  suggestions[c.key] = [...s];
+  const dl = document.createElement("datalist"); dl.id = "dl-" + c.key;
+  dl.innerHTML = [...s].map(v => `<option value="${esc(v)}">`).join("");
+  document.body.appendChild(dl);
+});
+
+function renderList() {
+  const q = $("#filter").value.trim().toLowerCase(), only = $("#untitled").checked;
+  $("#items").innerHTML = R.map((r, i) => {
+    const title = val(r, "title");
+    if (only && title) return "";
+    if (q && !(r.original + " " + r.file + " " + (title || "")).toLowerCase().includes(q)) return "";
+    const changed = r.original in edits.recordings ? `<span class="dot">● </span>` : "";
+    return `<div class="item${i === current ? " sel" : ""}" data-i="${i}"><div class="t">${changed}${esc(title || r.original)}</div>
+      <div class="s">${esc(val(r, "date") || "–")} · ${esc(r.file)}</div></div>`;
+  }).join("");
+}
+
+function renderForm() {
+  const r = R[current], box = $("#form");
+  if (!r) { box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="meta">${esc(r.file)} · ${clock(r.duration_s || 0)}${r.original !== r.file ? " · " + esc(r.original) : ""}</div>
+    <audio controls preload="none" src="${url(r.file)}"></audio>`;
+  const g = document.createElement("div"); g.className = "grid";
+  // date with validation
+  const d = widget({ label: E.date + " ", type: "text" }, val(r, "date"), v => {
+    const ok = !v || /^\d{4}(-\d\d(-\d\d)?)?$/.test(v); inp.classList.toggle("bad", !ok);
+    if (ok) setVal(r, "date", v); else flash(E.invalid_date + ": " + v);
+  });
+  const inp = d.querySelector("input"); inp.placeholder = E.date_hint;
+  const approx = document.createElement("label"); approx.className = "check";
+  approx.innerHTML = `<input type="checkbox"> ${esc(E.date_approx)}`;
+  approx.firstChild.checked = !!val(r, "date_approx");
+  approx.firstChild.onchange = e => setVal(r, "date_approx", e.target.checked);
+  d.appendChild(approx); g.appendChild(d);
+  g.appendChild(widget({ label: E.title, type: "text" }, val(r, "title"), v => setVal(r, "title", v)));
+  g.appendChild(widget({ label: E.summary, type: "textarea" }, val(r, "summary"), v => setVal(r, "summary", v)));
+  box.appendChild(g);
+
+  if (M.categories.length) {
+    box.insertAdjacentHTML("beforeend", `<h2>${esc(E.tags)}</h2>`);
+    const tg = document.createElement("div"); tg.className = "grid";
+    for (const c of M.categories) {
+      const w = widget({ label: c.label, type: "list" }, val(r, "tags." + c.key) || [], v => setVal(r, "tags." + c.key, v));
+      w.querySelector("input").setAttribute("list", "dl-" + c.key);
+      tg.appendChild(w);
+    }
+    box.appendChild(tg);
+  }
+  if (M.recording_fields.length) {
+    box.insertAdjacentHTML("beforeend", `<h2>${esc(M.ui.details)}</h2>`);
+    const fg = document.createElement("div"); fg.className = "grid";
+    for (const f of M.recording_fields) fg.appendChild(widget(f, val(r, "fields." + f.key), v => setVal(r, "fields." + f.key, v)));
+    box.appendChild(fg);
+  }
+
+  const more = document.createElement("div"); more.className = "grid"; more.style.marginTop = "14px";
+  const spk = val(r, "speakers") || {};
+  const spkText = [...new Set([...Object.keys(spk), ...(r.speaker_codes || []).filter(c => /^S\d+$/.test(c))])]
+    .map(c => `${c} = ${spk[c] || ""}`).join("\n");
+  const sw = widget({ label: E.speakers, type: "textarea" }, spkText, v => {
+    const o = {}; v.split("\n").forEach(l => { const m = l.match(/^\s*(S\d+)\s*=\s*(.+?)\s*$/); if (m) o[m[1]] = m[2]; });
+    setVal(r, "speakers", o);
+  });
+  sw.className = ""; sw.querySelector("label").insertAdjacentHTML("beforeend", ` <span class="hint">(${esc(E.speakers_hint)})</span>`);
+  more.appendChild(sw);
+  const chText = (val(r, "chapters") || []).map(([s, t]) => `${clock(s)} ${t}`).join("\n");
+  const cw = widget({ label: M.chapters_label, type: "textarea" }, chText, v => {
+    const out = [];
+    v.split("\n").forEach(l => { const m = l.match(/^\s*(?:(\d+):)?(\d+):(\d\d)\s+(.+)$/);
+      if (m) out.push([(+(m[1] || 0)) * 3600 + (+m[2]) * 60 + (+m[3]), m[4].trim()]); });
+    setVal(r, "chapters", out);
+  });
+  cw.className = ""; cw.querySelector("label").insertAdjacentHTML("beforeend", ` <span class="hint">(${esc(E.chapters_hint)})</span>`);
+  more.appendChild(cw);
+  more.appendChild(widget({ label: E.note, type: "textarea" }, val(r, "note"), v => setVal(r, "note", v)));
+  box.appendChild(more);
+
+  if ((r.preview || []).length) {
+    box.insertAdjacentHTML("beforeend", `<h2>${esc(E.transcript_preview)}</h2><div class="preview">${r.preview.map(([s, w, t]) =>
+      `<div data-t="${s}"><span class="tc">${clock(s)}</span><b>${esc(w)}</b> ${esc(t)}</div>`).join("")}</div>`);
+    box.querySelector(".preview").onclick = e => { const el = e.target.closest("[data-t]"); if (!el) return;
+      const a = box.querySelector("audio"), go = () => { a.currentTime = +el.dataset.t; a.play(); };
+      a.readyState >= 1 ? go() : (a.addEventListener("loadedmetadata", go, { once: true }), a.load()); };
+  }
+  const nav = document.createElement("div"); nav.className = "nav";
+  nav.innerHTML = `<button class="b" id="prev">← ${esc(E.previous)}</button><button class="b" id="next">${esc(E.next)} →</button>`;
+  box.appendChild(nav);
+  nav.querySelector("#prev").onclick = () => select(Math.max(0, current - 1));
+  nav.querySelector("#next").onclick = () => select(Math.min(R.length - 1, current + 1));
+}
+
+function select(i) { current = i; renderList(); renderForm(); window.scrollTo({ top: 0 }); }
+
+// ----- saving -----
+function payload() {
+  const out = { recordings: edits.recordings };
+  if (Object.keys(edits.project).length) out.project = edits.project;
+  if (edits.title !== undefined) out.title = edits.title;
+  return JSON.stringify(out, null, 1);
+}
+async function save() {
+  const text = payload(), name = `edits-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}.json`;
+  try {
+    if (window.showSaveFilePicker) {
+      flash(E.save_hint);
+      const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ accept: { "application/json": [".json"] } }] });
+      const w = await h.createWritable(); await w.write(text); await w.close();
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([text], { type: "application/json" })); a.download = name; a.click();
+      alert(E.save_hint);
+    }
+  } catch (e) { if (e.name === "AbortError") return; throw e; }
+  edits = { recordings: {}, project: {} }; persist(); renderList(); flash(E.saved);
+}
+
+$("#save").onclick = save;
+$("#copy").onclick = async () => { await navigator.clipboard.writeText(payload()); flash(E.copied); };
+$("#discard").onclick = () => { if (confirm(E.discard_confirm)) { edits = { recordings: {}, project: {} }; persist(); renderList(); renderForm(); renderProject(); } };
+$("#items").onclick = e => { const el = e.target.closest(".item"); if (el) select(+el.dataset.i); };
+$("#filter").oninput = renderList; $("#untitled").onchange = renderList;
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
+  $("#rec").hidden = b.dataset.tab !== "rec"; $("#proj").hidden = b.dataset.tab !== "proj";
+});
+const firstOpen = R.findIndex(r => !r.title);
+current = firstOpen >= 0 ? firstOpen : 0;
+renderProject(); renderList(); renderForm(); status();
+</script>
+</body>
+</html>

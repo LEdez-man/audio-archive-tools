@@ -1,0 +1,8 @@
+{
+ "language": "en",
+ "transcription_language": "auto",
+ "noscribe_path": "C:/Program Files (x86)/noScribe/noScribe.exe",
+ "model": "precise",
+ "speaker_detection": "auto",
+ "mark_pauses": "3sec+"
+}

@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio archive</title>
+<style>
+:root {
+  --bg: #f6f3ee; --panel: #fffdf9; --ink: #2b2723; --muted: #7a7168; --line: #e4ddd3;
+  --accent: #9a4f2c; --accent-soft: #f3e3d9; --chip: #efe9e1; --hit: #fff1a8; --now: #e9f1e4;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1b1916; --panel: #24211d; --ink: #ece6dd; --muted: #a39a8e; --line: #3a352f;
+          --accent: #e09a72; --accent-soft: #3d2c22; --chip: #322d27; --hit: #5a4d12; --now: #2a3a25; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+       font: 16px/1.5 "Segoe UI", system-ui, "Hiragino Sans", "Microsoft YaHei", sans-serif; }
+header { padding: 28px 16px 12px; max-width: 1180px; margin: 0 auto; }
+h1 { font: 600 28px/1.2 Georgia, "Times New Roman", serif; margin: 0 0 4px; }
+.desc { margin: 4px 0; max-width: 70ch; }
+.sub { color: var(--muted); font-size: 14px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 60px; display: grid;
+        grid-template-columns: 240px minmax(0, 1fr); gap: 28px; }
+@media (max-width: 800px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+aside { position: sticky; top: 12px; align-self: start; }
+@media (max-width: 800px) { aside { position: static; } }
+input[type=search] { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+       background: var(--panel); color: var(--ink); font-size: 15px; }
+.fgroup { margin-top: 18px; }
+.fgroup h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+             margin: 0 0 6px; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid transparent; background: var(--chip); color: var(--ink); border-radius: 999px;
+        padding: 3px 10px; font-size: 13px; cursor: pointer; font-family: inherit; }
+.chip .n { color: var(--muted); font-size: 11px; margin-left: 3px; }
+.chip.on { background: var(--accent); color: #fff; }
+.chip.on .n { color: #ffffffb0; }
+.reset { margin-top: 14px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; font-size: 14px; }
+.count { color: var(--muted); font-size: 14px; margin: 4px 0 10px; }
+.year { font: 600 22px Georgia, serif; margin: 26px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+.head { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: 12px; padding: 12px 14px; cursor: pointer; align-items: baseline; }
+@media (max-width: 560px) { .head { grid-template-columns: minmax(0, 1fr) auto; } .head .date { grid-column: 1 / -1; } }
+.date { color: var(--accent); font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 600; }
+.title { font-weight: 600; overflow-wrap: anywhere; }
+.dur { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tags { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+@media (max-width: 560px) { .tags { grid-column: 1 / -1; } }
+.tag { font-size: 12px; background: var(--chip); border-radius: 4px; padding: 0 6px; color: var(--muted); }
+.tag.c1 { background: var(--accent-soft); color: var(--accent); }
+.body { padding: 0 14px 14px; border-top: 1px solid var(--line); }
+.summary { margin: 12px 0; }
+audio { width: 100%; margin: 4px 0 8px; }
+.links { font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); overflow-wrap: anywhere; }
+.links a { color: var(--accent); }
+.chapters { margin: 10px 0; padding: 0; list-style: none; }
+.chapters li { display: flex; gap: 10px; padding: 2px 0; cursor: pointer; }
+.chapters li:hover .ct { text-decoration: underline; }
+.tc { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; min-width: 52px; }
+.hits { margin: 6px 0 2px; font-size: 14px; }
+.hit { cursor: pointer; padding: 2px 0; }
+mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2px; }
+details.tr { margin-top: 10px; }
+details.tr summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+.seg { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; padding: 3px 4px; border-radius: 4px; cursor: pointer; font-size: 15px; }
+.seg:hover { background: var(--chip); }
+.seg.now { background: var(--now); }
+.who { font-weight: 600; font-size: 13px; color: var(--muted); margin-right: 4px; }
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 14px; font-size: 14px; margin: 8px 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+details.about { margin-top: 8px; font-size: 14px; }
+details.about summary { cursor: pointer; color: var(--accent); }
+h4 { margin: 12px 0 4px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.note { font-size: 13px; color: var(--muted); font-style: italic; }
+footer { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p class="desc" id="desc"></p>
+  <div class="sub" id="sub"></div>
+  <div id="about"></div>
+</header>
+<div class="wrap">
+  <aside>
+    <input type="search" id="q">
+    <div class="fgroup"><h3 id="l-year"></h3><div class="chips" data-facet="year"></div></div>
+    <div id="facets"></div>
+    <button class="reset" id="reset"></button>
+  </aside>
+  <main>
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+  </main>
+</div>
+<footer id="foot"></footer>
+<script>
+const DATA = /*__DATA__*/null;
+const M = DATA.meta, U = M.ui, R = DATA.recordings, CATS = M.categories;
+const sel = { year: new Set() };
+CATS.forEach(c => sel[c.key] = new Set());
+let q = "";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
+const yearOf = r => (r.date || "").slice(0, 4) || U.no_date;
+const tags = (r, key) => (r.tags || {})[key] || [];
+const tc = s => { s = Math.floor(s); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return (h ? h + ":" + String(m).padStart(2,"0") : m) + ":" + String(x).padStart(2,"0"); };
+const dur = s => s >= 3600 ? `${Math.floor(s/3600)} ${U.unit_h} ${Math.round(s%3600/60)} ${U.unit_min}`
+               : s >= 60 ? `${Math.round(s/60)} ${U.unit_min}` : `${Math.round(s)} ${U.unit_s}`;
+function fdate(r) {
+  if (!r.date) return "–";
+  const [y, m, d] = r.date.split("-").map(Number);
+  const opts = d ? { year: "numeric", month: "2-digit", day: "2-digit" } : m ? { year: "numeric", month: "long" } : { year: "numeric" };
+  let s; try { s = new Date(y, (m || 1) - 1, d || 1).toLocaleDateString(M.lang, opts); } catch (e) { s = r.date; }
+  return (r.date_approx ? U.approx + " " : "") + s;
+}
+const url = f => encodeURI(f).replace(/#/g, "%23");
+R.forEach(r => r._text = [r.title, r.summary, r.original, r.note, ...CATS.flatMap(c => tags(r, c.key)),
+  ...Object.values(r.fields || {}).flat()].join(" ").toLowerCase());
+
+const shown = v => Array.isArray(v) ? v.join(", ") : v;
+function facts(defs, values) {
+  const rows = defs.filter(f => values && values[f.key] !== undefined && values[f.key] !== "" && !(Array.isArray(values[f.key]) && !values[f.key].length))
+    .map(f => { const o = (f.options || []).find(x => x[0] === values[f.key]);
+      return `<dt>${esc(f.label)}</dt><dd>${esc(o ? o[1] : shown(values[f.key]))}</dd>`; });
+  return rows.length ? `<dl class="facts">${rows.join("")}</dl>` : "";
+}
+document.documentElement.lang = M.lang;
+document.title = M.title;
+$("#h1").textContent = M.title;
+$("#desc").textContent = (M.project || {}).description || "";
+const aboutFacts = facts(M.project_fields.filter(f => f.key !== "description"), M.project);
+if (aboutFacts) $("#about").innerHTML = `<details class="about"><summary>${esc(U.project_info)}</summary>${aboutFacts}</details>`;
+$("#q").placeholder = U.search_placeholder;
+$("#l-year").textContent = U.year;
+$("#reset").textContent = U.reset;
+$("#facets").innerHTML = CATS.map(c => `<div class="fgroup"><h3>${esc(c.label)}</h3><div class="chips" data-facet="${esc(c.key)}"></div></div>`).join("");
+
+function facet(key, get, order) {
+  const n = new Map();
+  R.forEach(r => get(r).forEach(v => n.set(v, (n.get(v) || 0) + 1)));
+  const vals = [...n.keys()].sort(order || ((x, y) => n.get(y) - n.get(x) || x.localeCompare(y, M.lang)));
+  const box = document.querySelector(`[data-facet="${key}"]`);
+  box.innerHTML = vals.map(v => `<button class="chip${sel[key].has(v) ? " on" : ""}" data-v="${esc(v)}">${esc(v)}<span class="n">${n.get(v)}</span></button>`).join("");
+  box.onclick = e => { const b = e.target.closest(".chip"); if (!b) return;
+    const v = b.dataset.v; sel[key].has(v) ? sel[key].delete(v) : sel[key].add(v); render(); };
+  box.parentElement.style.display = vals.length ? "" : "none";
+}
+
+function matches(r) {
+  if (sel.year.size && !sel.year.has(yearOf(r))) return false;
+  for (const c of CATS) for (const v of sel[c.key]) if (!tags(r, c.key).includes(v)) return false;
+  if (!q) return true;
+  return r._text.includes(q) || r.seg.some(s => s[2].toLowerCase().includes(q));
+}
+
+function hl(text) {
+  if (!q) return esc(text);
+  const i = text.toLowerCase().indexOf(q); if (i < 0) return esc(text);
+  return esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
+}
+
+function card(r, idx) {
+  const chips = CATS.map((c, ci) => tags(r, c.key).map(v => `<span class="tag c${ci}">${esc(v)}</span>`).join("")).join("");
+  let hits = "";
+  if (q) {
+    const hs = r.seg.filter(s => s[2].toLowerCase().includes(q));
+    if (hs.length) hits = `<div class="hits">${hs.slice(0, 4).map(s =>
+      `<div class="hit" data-t="${s[0]}"><span class="tc">${tc(s[0])}</span> ${hl(s[2])}</div>`).join("")}${hs.length > 4 ? `<div class="note">${esc(fmt(U.more_hits, { n: hs.length - 4 }))}</div>` : ""}</div>`;
+  }
+  return `<div class="card" data-i="${idx}">
+    <div class="head"><span class="date">${fdate(r)}</span><span class="title">${hl(r.title || r.file)}</span>
+      <span class="dur">${dur(r.duration_s || 0)}</span><div class="tags">${chips}</div></div>
+    ${hits ? `<div style="padding:0 14px 10px">${hits}</div>` : ""}
+  </div>`;
+}
+
+function toggle(el) {
+  if (el.querySelector(".body")) { el.querySelector(".body").remove(); return; }
+  const r = R[el.dataset.i];
+  const chap = (r.chapters || []).length ? `<ul class="chapters">${r.chapters.map(k =>
+    `<li data-t="${k[0]}"><span class="tc">${tc(k[0])}</span><span class="ct">${esc(k[1])}</span></li>`).join("")}</ul>` : "";
+  const seg = r.seg.map(s => `<div class="seg" data-t="${s[0]}"><span class="tc">${tc(s[0])}</span><span><span class="who">${esc(s[1])}</span>${hl(s[2])}</span></div>`).join("");
+  const b = document.createElement("div");
+  b.className = "body";
+  b.innerHTML = `
+    ${r.summary ? `<p class="summary">${esc(r.summary)}</p>` : ""}
+    ${r.note ? `<p class="note">${esc(r.note)}</p>` : ""}
+    <audio controls preload="metadata" src="${url(r.file)}"></audio>
+    <div class="links"><a href="${url(r.file)}">${esc(U.audio_file)}</a>
+      ${r.html ? `<a href="${url(r.html)}">${esc(U.transcript_link)}</a>` : ""}
+      ${r.srt ? `<a href="${url(r.srt)}">${esc(U.subtitles_link)}</a>` : ""}
+      <span>${esc(r.file)}</span></div>
+    ${facts(M.recording_fields, r.fields)}
+    ${chap ? `<h4>${esc(M.chapters_label)}</h4>` + chap : ""}
+    ${seg ? `<details class="tr"${q ? " open" : ""}><summary>${esc(fmt(U.transcript_summary, { n: r.seg.length }))}</summary>${seg}</details>`
+          : r.html ? `<p class="note">${esc(U.no_text)}</p>` : ""}`;
+  el.appendChild(b);
+  const au = b.querySelector("audio"), segs = [...b.querySelectorAll(".seg")];
+  au.addEventListener("timeupdate", () => {
+    let cur = null; for (const s of segs) { if (+s.dataset.t <= au.currentTime) cur = s; else break; }
+    segs.forEach(s => s.classList.toggle("now", s === cur));
+  });
+}
+
+function seek(el, t) {
+  if (!el.querySelector(".body")) toggle(el);
+  const au = el.querySelector("audio");
+  const go = () => { au.currentTime = t; au.play(); };
+  au.readyState >= 1 ? go() : au.addEventListener("loadedmetadata", go, { once: true });  // seek only once the file is known
+}
+
+function render() {
+  facet("year", r => [yearOf(r)], (x, y) => x.localeCompare(y));
+  CATS.forEach(c => facet(c.key, r => tags(r, c.key), c.order.length ? (x, y) => {
+    const i = c.order.indexOf(x), j = c.order.indexOf(y);
+    return (i < 0 ? 999 : i) - (j < 0 ? 999 : j) || x.localeCompare(y, M.lang); } : null));
+  const list = R.map((r, i) => [r, i]).filter(([r]) => matches(r));
+  let out = "", y = null;
+  for (const [r, i] of list) {
+    if (yearOf(r) !== y) { y = yearOf(r); out += `<div class="year">${esc(y)}</div>`; }
+    out += card(r, i);
+  }
+  $("#list").innerHTML = out || `<p class="note">${esc(U.no_results)}</p>`;
+  const sum = list.reduce((s, [r]) => s + (r.duration_s || 0), 0);
+  $("#count").textContent = fmt(U.count, { shown: list.length, total: R.length, duration: dur(sum) });
+}
+
+$("#list").addEventListener("click", e => {
+  const el = e.target.closest(".card"); if (!el) return;
+  const tEl = e.target.closest("[data-t]");
+  if (tEl) return seek(el, +tEl.dataset.t);
+  if (e.target.closest(".head")) toggle(el);
+});
+let tm; $("#q").addEventListener("input", e => { clearTimeout(tm); tm = setTimeout(() => { q = e.target.value.trim().toLowerCase(); render(); }, 200); });
+$("#reset").onclick = () => { Object.values(sel).forEach(s => s.clear()); q = ""; $("#q").value = ""; render(); };
+const total = R.reduce((s, r) => s + (r.duration_s || 0), 0);
+$("#sub").textContent = fmt(U.subtitle, { n: R.length, duration: dur(total) });
+let built; try { built = new Date(M.built).toLocaleString(M.lang, { dateStyle: "medium", timeStyle: "short" }); } catch (e) { built = M.built; }
+$("#foot").textContent = fmt(U.footer, { date: built });
+render();
+</script>
+</body>
+</html>

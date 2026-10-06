@@ -1,0 +1,24 @@
+{
+ "transcribe": true,
+ "project_fields": [
+  {"key": "project", "type": "text"},
+  {"key": "institution", "type": "text"},
+  {"key": "principal_investigator", "type": "text"},
+  {"key": "period", "type": "text"},
+  {"key": "region", "type": "text"},
+  {"key": "description", "type": "textarea"},
+  {"key": "repository", "type": "text"},
+  {"key": "license", "type": "text"}
+ ],
+ "recording_fields": [
+  {"key": "interview_id", "type": "text"},
+  {"key": "interviewee", "type": "text"},
+  {"key": "interviewer", "type": "text"},
+  {"key": "place", "type": "text"},
+  {"key": "language", "type": "text"},
+  {"key": "consent", "type": "select", "options": ["yes", "written", "oral", "pending", "no"]},
+  {"key": "access", "type": "select", "options": ["open", "restricted", "closed"]},
+  {"key": "embargo_until", "type": "date"}
+ ],
+ "categories": [{"key": "people"}, {"key": "topics"}, {"key": "places"}]
+}

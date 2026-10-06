@@ -1,0 +1,11 @@
+{
+ "transcribe": true,
+ "project_fields": [
+  {"key": "period", "type": "text"},
+  {"key": "description", "type": "textarea"}
+ ],
+ "recording_fields": [
+  {"key": "place", "type": "text"}
+ ],
+ "categories": [{"key": "keywords"}]
+}

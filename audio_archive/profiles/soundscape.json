@@ -1,0 +1,22 @@
+{
+ "transcribe": false,
+ "project_fields": [
+  {"key": "project", "type": "text"},
+  {"key": "period", "type": "text"},
+  {"key": "region", "type": "text"},
+  {"key": "description", "type": "textarea"},
+  {"key": "license", "type": "text"}
+ ],
+ "recording_fields": [
+  {"key": "place", "type": "text"},
+  {"key": "coordinates", "type": "text"},
+  {"key": "time_of_day", "type": "text"},
+  {"key": "habitat", "type": "text"},
+  {"key": "weather", "type": "text"},
+  {"key": "equipment", "type": "text"},
+  {"key": "mic_setup", "type": "text"},
+  {"key": "audio_format", "type": "text"},
+  {"key": "recorded_by", "type": "text"}
+ ],
+ "categories": [{"key": "places"}, {"key": "sound_sources"}, {"key": "habitats"}]
+}
